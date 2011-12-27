@@ -8,10 +8,10 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.neo4j.server.plugin</groupId>
-  <artifactId>neo4j-gremlin-rhino-plugin</artifactId>
+  <artifactId>neo4j-javascript-plugin</artifactId>
   <packaging>jar</packaging>
   <version>1.6-SNAPSHOT</version>
-  <name>neo4j-gremlin-rhino-plugin</name>
+  <name>neo4j-javascript-plugin</name>
 
   <properties>
     <!-- Jar Versions -->
@@ -51,7 +51,11 @@ the relevant Commercial Agreement.
   </scm>
 
   <dependencies>
-
+    <dependency>
+      <groupId>rhino</groupId>
+      <artifactId>js</artifactId>
+      <version>1.7R2</version>
+    </dependency>
     <!-- Neo4j Dependencies -->
     <dependency>
       <groupId>org.neo4j.app</groupId>
