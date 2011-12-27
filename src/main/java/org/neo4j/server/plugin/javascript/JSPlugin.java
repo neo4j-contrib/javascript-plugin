@@ -59,7 +59,6 @@ public class JSPlugin extends ServerPlugin
     private final String g = "g";
     private final String gdb = "gdb";
     private final String pipe = "pipe";
-    private final String table = "table";
     
     private volatile ScriptEngine engine;
     private final EngineReplacementDecision engineReplacementDecision = new CountingEngineReplacementDecision(
@@ -68,9 +67,7 @@ public class JSPlugin extends ServerPlugin
 
     private ScriptEngine createQueryEngine()
     {
-        //return new ScriptEngineManager().getEngineByName( "gremlin-groovy" );
-    	return new ScriptEngineManager().getEngineByName( "JavaScript" );
-    	
+    	return new ScriptEngineManager().getEngineByName( "JavaScript" );    	
     }
 
     @Name( "execute_script" )
@@ -116,7 +113,6 @@ public class JSPlugin extends ServerPlugin
         bindings.put( g, graph );
         bindings.put( gdb, neo4j );
         bindings.put( pipe, pipeline );
-        bindings.put( table, table);
         return bindings;
     }
 

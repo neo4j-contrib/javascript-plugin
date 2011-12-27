@@ -52,8 +52,6 @@ public class JSToRepresentationConverter
 
     public Representation convert( final Object data )
     {
-    	System.out.print("DATA:" + data);
-    	
         if ( data instanceof Table )
         {
             return new GremlinTableRepresentation( (Table) data );
@@ -67,6 +65,7 @@ public class JSToRepresentationConverter
             Iterator iterator = (Iterator) data;
             return getIteratorRepresentation( iterator );
         }
+        // added for the JavaScript plugin - James 
         if ( data instanceof NativeArray )
         {	
         	NativeArray na = (NativeArray) data;
@@ -74,7 +73,6 @@ public class JSToRepresentationConverter
         	for (Object o : na.getIds()) {
         		int index = (Integer) o;
         		array[index] = na.get(index, null);
-        		//System.out.println(na.get(index,null));
         	}
         	return getListRepresentation( Arrays.asList(array) );
         }
