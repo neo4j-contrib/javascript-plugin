@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+//import sun.org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeArray;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -41,8 +42,9 @@ import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.pipes.util.Table;
 
-// added by James
-import scala.actors.threadpool.Arrays;
+// Peter, did you change this from Java Arrays to sc
+//import scala.actors.threadpool.Arrays;
+import java.util.Arrays;
 
 public class JSToRepresentationConverter
 {

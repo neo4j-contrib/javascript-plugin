@@ -44,7 +44,7 @@ import org.neo4j.visualization.asciidoc.AsciidocHelper;
 
 public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
 {
-    private static final String ENDPOINT = "http://localhost:7474/db/data/ext/GremlinPlugin/graphdb/execute_script";
+    private static final String ENDPOINT = "http://localhost:7474/db/data/ext/JSPlugin/graphdb/execute_script";
     
     /**
      * Scripts can be sent as URL-encoded In this example, the graph has been
@@ -386,11 +386,12 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
 /*        String script = "m = [:];"
                         + "g.v(%Peter%).bothE().label.groupCount(m).iterate();m";*/
         
-        String script = "m = [:];" +
-                		"pipe.start(g.v(%Peter%)).bothE().label().groupCount(m).iterate();" +
-                		"return m";
+        String script = "var m = {};" +
+                		"pipe.start(g.getVertex(%Peter%)).bothE().label().groupCount(m).iterate();" +
+                		"m";
         
         String response = doRestCall( script, Status.OK );
+        System.out.println(response);
         assertTrue( response.contains( "knows=2" ) );
     }
 
@@ -526,14 +527,15 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     {
         //String script = "x=[];fof=[:];"
         //                + "g.v(%Joe%).out('knows').aggregate(x).out('knows').except(x).groupCount(fof).iterate();fof.sort{a,b -> b.value <=> a.value}";
-        String script = "x=[];" +
-        				"fof=[:];" +
+        String script = "var x = [];" +
+        				"var fof = {};" +
         				"pipe.start(g.getVertex(%Joe%))." +
         				"out('knows').aggregate(x)." +
-        				"out('knows').except(x).groupCount(fof).iterate();" +
-        				"fof.sort{a,b -> b.value <=> a.value}";
-
+        				"out('knows').except(x).groupCount(fof).iterate();";
+        			
+                        // sort fof
         String response = doRestCall( script, Status.OK );
+        System.out.println(response);
         assertFalse( response.contains( "v[" + data.get().get( "Bill" ).getId() ) );
         assertFalse( response.contains( "v[" + data.get().get( "Sara" ).getId() ) );
         assertTrue( response.contains( "v[" + data.get().get( "Ian" ).getId() ) );
