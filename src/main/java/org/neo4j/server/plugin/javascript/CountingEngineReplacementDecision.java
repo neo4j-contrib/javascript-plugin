@@ -17,10 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
-public interface EngineReplacementDecision {
-    boolean mustReplaceEngine();
+import java.util.concurrent.atomic.AtomicInteger;
 
-    void beforeExecution(String script);
+class CountingEngineReplacementDecision implements EngineReplacementDecision {
+    private final AtomicInteger executionCount = new AtomicInteger();
+    private final int maxExecutionCount;
+
+    public CountingEngineReplacementDecision(int maxExecutionCount) {
+        this.maxExecutionCount = maxExecutionCount;
+    }
+
+    @Override
+    public void beforeExecution(String script) {
+        executionCount.incrementAndGet();
+    }
+
+    @Override
+    public boolean mustReplaceEngine() {
+        if (executionCount.get() < maxExecutionCount) return false;
+        executionCount.set(0);
+        return true;
+    }
 }

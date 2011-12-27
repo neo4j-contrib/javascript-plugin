@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.mozilla.javascript.NativeArray;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -42,11 +43,10 @@ import com.tinkerpop.pipes.util.Table;
 
 // added by James
 import scala.actors.threadpool.Arrays;
-import sun.org.mozilla.javascript.NativeArray;
 
-public class GremlinToRepresentationConverter
+public class JSToRepresentationConverter
 {
-    public GremlinToRepresentationConverter()
+    public JSToRepresentationConverter()
     {
     }
 

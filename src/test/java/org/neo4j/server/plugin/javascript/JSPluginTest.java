@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
 import static org.junit.Assert.assertTrue;
 
@@ -37,6 +37,7 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.server.plugin.javascript.JSPlugin;
 import org.neo4j.server.rest.repr.OutputFormat;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.server.rest.repr.formats.JsonFormat;
@@ -45,12 +46,11 @@ import org.neo4j.test.ImpermanentGraphDatabase;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
 
-public class GremlinPluginTest
+public class JSPluginTest
 {
     private static ImpermanentGraphDatabase neo4j = null;
-    private static GremlinPlugin plugin = null;
+    private static JSPlugin plugin = null;
     private static OutputFormat json = null;
     private static JSONParser parser = new JSONParser();
 
@@ -60,7 +60,7 @@ public class GremlinPluginTest
         json = new OutputFormat( new JsonFormat(),
                 new URI( "http://localhost/" ), null );
         neo4j = new ImpermanentGraphDatabase();
-        plugin = new GremlinPlugin();
+        plugin = new JSPlugin();
         Graph graph = new Neo4jGraph( neo4j );
         
         Vertex marko = graph.addVertex( "1" );
@@ -108,7 +108,7 @@ public class GremlinPluginTest
     {
     	//String script = "g.v(1)";
     	String script = "pipe.start(g.getVertex(1)).next()";
-    	Representation rep = GremlinPluginTest.executeTestScript( script , null);
+    	Representation rep = JSPluginTest.executeTestScript( script , null);
     	String JSONString = json.format( rep );
     	
         JSONObject object = (JSONObject) parser.parse( JSONString );
@@ -128,7 +128,7 @@ public class GremlinPluginTest
     	String script = "t = new Table();" +
 						"pipe.start(g.getVertex(1)).out('knows').as('friends').table(t).iterate();" +
 						"t";
-    	Representation rep = GremlinPluginTest.executeTestScript( script, null);
+    	Representation rep = JSPluginTest.executeTestScript( script, null);
     	String out = json.format(rep);
     	System.out.println(out);
         assertTrue( out.contains("josh") );
@@ -139,7 +139,7 @@ public class GremlinPluginTest
     {
     	//String script = "g.V";
     	String script = "pipe.start(g).V()";
-        JSONArray array = (JSONArray) parser.parse( json.format( GremlinPluginTest.executeTestScript( script, null) ) );
+        JSONArray array = (JSONArray) parser.parse( json.format( JSPluginTest.executeTestScript( script, null) ) );
         List<String> ids = new ArrayList<String>( Arrays.asList( "1", "2", "3", "4", "5", "6" ) );
         Assert.assertEquals( array.size(), 6 );
         for ( Object object : array )
@@ -186,7 +186,7 @@ public class GremlinPluginTest
     {
     	//String script = "g.E";
     	String script = "pipe.start(g).E()";
-        JSONArray array = (JSONArray) parser.parse(  json.format( GremlinPluginTest.executeTestScript( script, null) ) );
+        JSONArray array = (JSONArray) parser.parse(  json.format( JSPluginTest.executeTestScript( script, null) ) );
         List<String> ids = new ArrayList<String>( Arrays.asList( "0", "1", "2",
                 "3", "4", "5" ) );
         Assert.assertEquals( array.size(), 6 );
@@ -205,7 +205,7 @@ public class GremlinPluginTest
     @Test
     public void testExecuteScriptGraph() throws Exception
     {
-        String ret = (String) parser.parse( json.format( GremlinPluginTest.executeTestScript( "g", null) ) );
+        String ret = (String) parser.parse( json.format( JSPluginTest.executeTestScript( "g", null) ) );
         Assert.assertEquals( ret, "ImpermanentGraphDatabase [" + neo4j.getStoreDir() + "]" );
     }
 
@@ -219,7 +219,7 @@ public class GremlinPluginTest
     	// NOTE: The Rhino script engine converts JavaScript numbers to Java doubles
         Assert.assertEquals(
                 1.0,
-                parser.parse( json.format( GremlinPluginTest.executeTestScript( "1", null) ) ) );
+                parser.parse( json.format( JSPluginTest.executeTestScript( "1", null) ) ) );
     }
 
     @Test
@@ -230,7 +230,7 @@ public class GremlinPluginTest
         
     	// NOTE: The Rhino script engine converts JavaScript numbers to Java doubles
         Assert.assertEquals("[ 1.0, 2, 5, 6, 8 ]",
-                			json.format( GremlinPluginTest.executeTestScript( "[1,2,5,6,8]", null) ) );
+                			json.format( JSPluginTest.executeTestScript( "[1,2,5,6,8]", null) ) );
         
     }
 
@@ -242,7 +242,7 @@ public class GremlinPluginTest
    
         Assert.assertEquals(
                 "\"null\"",
-                json.format( GremlinPluginTest.executeTestScript( script, null) ) );
+                json.format( JSPluginTest.executeTestScript( script, null) ) );
     }
 
     @Test
@@ -250,7 +250,7 @@ public class GremlinPluginTest
     {
         Assert.assertEquals(
                 "1",
-                json.format( GremlinPluginTest.executeTestScript( "x", (Map)parser.parse( "{\"x\" : 1}")) ) );
+                json.format( JSPluginTest.executeTestScript( "x", (Map)parser.parse( "{\"x\" : 1}")) ) );
     }
     
     @Test
@@ -259,14 +259,14 @@ public class GremlinPluginTest
     	// All numeric values are returned as Java doubles
         Assert.assertEquals(
                 "1.0",
-                json.format( GremlinPluginTest.executeTestScript( "1", (Map)parser.parse( "{}")) ) );
+                json.format( JSPluginTest.executeTestScript( "1", (Map)parser.parse( "{}")) ) );
     }
 
     @Test
     public void testMultilineScriptWithLinebreaks()
     {
-        Assert.assertEquals( "2",
-                json.format( GremlinPluginTest.executeTestScript( "1;\n2", null) ) );
+        Assert.assertEquals( "2.0",
+                json.format( JSPluginTest.executeTestScript( "1;\n2", null) ) );
     }
 
     @Test
@@ -283,7 +283,7 @@ public class GremlinPluginTest
                 	// Returning values with "return" evidently doesn't work right in Rhino -- find out why.
                 	String script = "x=" + x + ";" +
                 					"x";
-                	Representation rep = GremlinPluginTest.executeTestScript( script , null);
+                	Representation rep = JSPluginTest.executeTestScript( script , null);
                 	String out = json.format( rep );
                 	System.out.print(out);
                     Assert.assertEquals(x + "", out );
@@ -317,7 +317,7 @@ public class GremlinPluginTest
                         "  }" +
                         "}).next()";
   
-    	String out = json.format( GremlinPluginTest.executeTestScript( script, null) );
+    	String out = json.format( JSPluginTest.executeTestScript( script, null) );
     	System.out.println(out);
     	
         JSONObject object = (JSONObject) parser.parse( out );

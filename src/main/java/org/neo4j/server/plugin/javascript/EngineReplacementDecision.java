@@ -17,28 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
-import java.util.HashSet;
-import java.util.Set;
+public interface EngineReplacementDecision {
+    boolean mustReplaceEngine();
 
-public class ScriptCountingEngineReplacementDecision implements EngineReplacementDecision {
-    private final Set<String> scripts=new HashSet<String>();
-    private final int maxScriptCount;
-
-    public ScriptCountingEngineReplacementDecision(int maxScriptCount) {
-        this.maxScriptCount = maxScriptCount;
-    }
-
-    @Override
-    public boolean mustReplaceEngine() {
-        if (scripts.size() < maxScriptCount) return false;
-        scripts.clear();
-        return true;
-    }
-
-    @Override
-    public void beforeExecution(String script) {
-        scripts.add(script);
-    }
+    void beforeExecution(String script);
 }

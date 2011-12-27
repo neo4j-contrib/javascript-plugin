@@ -22,7 +22,7 @@ package org.neo4j.server.rest.repr;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.neo4j.server.plugin.gremlin.GremlinToRepresentationConverter;
+import org.neo4j.server.plugin.javascript.JSToRepresentationConverter;
 
 import com.tinkerpop.pipes.util.Table;
 import com.tinkerpop.pipes.util.Table.Row;
@@ -31,7 +31,7 @@ public class GremlinTableRepresentation extends ObjectRepresentation
 {
 
     private final Table queryResult;
-    private final GremlinToRepresentationConverter converter = new GremlinToRepresentationConverter();
+    private final JSToRepresentationConverter converter = new JSToRepresentationConverter();
 
     public GremlinTableRepresentation(Table result)
     {

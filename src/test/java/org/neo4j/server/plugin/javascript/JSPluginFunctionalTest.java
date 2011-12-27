@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +42,7 @@ import org.neo4j.test.GraphDescription.REL;
 import org.neo4j.test.TestData.Title;
 import org.neo4j.visualization.asciidoc.AsciidocHelper;
 
-public class GremlinPluginFunctionalTest extends AbstractRestFunctionalTestBase
+public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
 {
     private static final String ENDPOINT = "http://localhost:7474/db/data/ext/GremlinPlugin/graphdb/execute_script";
     

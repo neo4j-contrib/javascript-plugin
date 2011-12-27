@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashSet;
+import java.util.Set;
 
-class CountingEngineReplacementDecision implements EngineReplacementDecision {
-    private final AtomicInteger executionCount = new AtomicInteger();
-    private final int maxExecutionCount;
+public class ScriptCountingEngineReplacementDecision implements EngineReplacementDecision {
+    private final Set<String> scripts=new HashSet<String>();
+    private final int maxScriptCount;
 
-    public CountingEngineReplacementDecision(int maxExecutionCount) {
-        this.maxExecutionCount = maxExecutionCount;
-    }
-
-    @Override
-    public void beforeExecution(String script) {
-        executionCount.incrementAndGet();
+    public ScriptCountingEngineReplacementDecision(int maxScriptCount) {
+        this.maxScriptCount = maxScriptCount;
     }
 
     @Override
     public boolean mustReplaceEngine() {
-        if (executionCount.get() < maxExecutionCount) return false;
-        executionCount.set(0);
+        if (scripts.size() < maxScriptCount) return false;
+        scripts.clear();
         return true;
+    }
+
+    @Override
+    public void beforeExecution(String script) {
+        scripts.add(script);
     }
 }

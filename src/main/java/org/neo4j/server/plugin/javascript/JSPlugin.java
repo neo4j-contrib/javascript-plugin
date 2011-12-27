@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.server.plugin.gremlin;
+package org.neo4j.server.plugin.javascript;
 
 import java.util.Map;
 
@@ -40,8 +40,6 @@ import org.neo4j.server.rest.repr.ValueRepresentation;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 
-import com.tinkerpop.pipes.util.Table;
-
 /* This is a class that will represent a server side
  * Gremlin plugin and will return JSON
  * for the following use cases:
@@ -55,7 +53,7 @@ import com.tinkerpop.pipes.util.Table;
  */
 
 @Description( "A server side Gremlin plugin for the Neo4j REST server" )
-public class GremlinPlugin extends ServerPlugin
+public class JSPlugin extends ServerPlugin
 {
 
     private final String g = "g";
@@ -66,7 +64,7 @@ public class GremlinPlugin extends ServerPlugin
     private volatile ScriptEngine engine;
     private final EngineReplacementDecision engineReplacementDecision = new CountingEngineReplacementDecision(
             500 );
-    private final GremlinToRepresentationConverter gremlinToRepresentationConverter = new GremlinToRepresentationConverter();
+    private final JSToRepresentationConverter gremlinToRepresentationConverter = new JSToRepresentationConverter();
 
     private ScriptEngine createQueryEngine()
     {
@@ -118,7 +116,7 @@ public class GremlinPlugin extends ServerPlugin
         bindings.put( g, graph );
         bindings.put( gdb, neo4j );
         bindings.put( pipe, pipeline );
-        bindings.put( table, Table);
+        bindings.put( table, table);
         return bindings;
     }
 
