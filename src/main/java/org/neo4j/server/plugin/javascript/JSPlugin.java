@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
@@ -61,13 +62,18 @@ public class JSPlugin extends ServerPlugin
     private final String pipe = "pipe";
     
     private volatile ScriptEngine engine;
-    private final EngineReplacementDecision engineReplacementDecision = new CountingEngineReplacementDecision(
-            500 );
+    private final EngineReplacementDecision engineReplacementDecision = new CountingEngineReplacementDecision( 500 );
     private final JSToRepresentationConverter gremlinToRepresentationConverter = new JSToRepresentationConverter();
 
-    private ScriptEngine createQueryEngine()
+    private ScriptEngine createQueryEngine( GraphDatabaseService neo4j )
     {
-    	return new ScriptEngineManager().getEngineByName( "JavaScript" );    	
+        //final Neo4jGraph graph = new Neo4jGraph( neo4j, false );
+    	//final GremlinPipeline pipeline = new GremlinPipeline();
+       
+    	ScriptEngine engine = new ScriptEngineManager().getEngineByName( "JavaScript" );   
+    	//engine.getContext().setAttribute("g", graph, ScriptContext.ENGINE_SCOPE);
+    	//engine.getContext().setAttribute("pipe", pipeline, ScriptContext.ENGINE_SCOPE);
+    	return engine;
     }
 
     @Name( "execute_script" )
@@ -86,7 +92,7 @@ public class JSPlugin extends ServerPlugin
             final Bindings bindings = createBindings( neo4j, params );
 
             
-            final Object result = engine().eval( script, bindings );
+            final Object result = engine(neo4j).eval( script, bindings );
             return gremlinToRepresentationConverter.convert( result );
         }
         catch ( final ScriptException e )
@@ -108,20 +114,21 @@ public class JSPlugin extends ServerPlugin
     private Bindings createInitialBinding( GraphDatabaseService neo4j )
     {
         final Bindings bindings = new SimpleBindings();
+        // moved initial bindings to engine scope
         final Neo4jGraph graph = new Neo4jGraph( neo4j, false );
     	final GremlinPipeline pipeline = new GremlinPipeline();
         bindings.put( g, graph );
-        bindings.put( gdb, neo4j );
         bindings.put( pipe, pipeline );
+        bindings.put( gdb, neo4j );
         return bindings;
     }
 
-    private ScriptEngine engine()
+    private ScriptEngine engine( GraphDatabaseService neo4j )
     {
         if ( this.engine == null
              || engineReplacementDecision.mustReplaceEngine() )
         {
-            this.engine = createQueryEngine();
+            this.engine = createQueryEngine(neo4j);
          
         }
         return this.engine;

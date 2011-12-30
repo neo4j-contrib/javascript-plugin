@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-//import sun.org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeArray;
+import sun.org.mozilla.javascript.NativeArray;
+//import org.mozilla.javascript.NativeArray;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;

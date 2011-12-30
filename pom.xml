@@ -54,7 +54,7 @@ the relevant Commercial Agreement.
     <dependency>
       <groupId>rhino</groupId>
       <artifactId>js</artifactId>
-      <version>1.7R2</version>
+      <version>1.7R3</version>
     </dependency>
     <!-- Neo4j Dependencies -->
     <dependency>
@@ -114,6 +114,21 @@ the relevant Commercial Agreement.
       <version>${blueprints.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.tinkerpop</groupId>
+      <artifactId>pipes</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tinkerpop</groupId>
+      <artifactId>gremlin</artifactId>
+      <version>1.4-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
 
     <!-- Jackson Dependencies -->
     <dependency>
