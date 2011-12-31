@@ -19,8 +19,6 @@
  */
 package org.neo4j.server.plugin.javascript;
 
-import static org.junit.Assert.assertTrue;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +35,6 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.server.plugin.javascript.JSPlugin;
 import org.neo4j.server.rest.repr.OutputFormat;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.server.rest.repr.formats.JsonFormat;
