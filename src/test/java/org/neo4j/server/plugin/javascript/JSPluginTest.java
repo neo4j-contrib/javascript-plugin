@@ -263,7 +263,7 @@ public class JSPluginTest
     @Test
     public void testMultilineScriptWithLinebreaks()
     {
-        Assert.assertEquals( "2",
+        Assert.assertEquals( "2.0",
                 json.format( JSPluginTest.executeTestScript( "1;\n2", null) ) );
     }
 
