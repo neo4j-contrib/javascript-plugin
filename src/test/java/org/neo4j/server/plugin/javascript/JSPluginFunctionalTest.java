@@ -332,9 +332,9 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
                         "query = new QueryContext( 'name:*' ).sort( new Sort(new SortField( 'name',SortField.STRING, true ) ) );" +	                     
                         "results = personIndex.query( query );"; */
 
-        String script = "importPackage(org.neo4j.graphdb.index);" +
-                		"importPackage(org.neo4j.index.lucene);" +
-                		"importPackage(org.apache.lucene.search);" +
+        String script = "importPackage(Packages.org.neo4j.graphdb.index);" +
+                		"importPackage(Packages.org.neo4j.index.lucene);" +
+                		"importPackage(Packages.org.apache.lucene.search);" +
                 		"neo4j = g.getRawGraph();" +
                 		"tx = neo4j.beginTx();" +
                 		"meNode = neo4j.createNode();" +
@@ -497,9 +497,9 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
 //    	
     	// using inE() instead of in() because "in" is a reserved keyword in JavaScript
     	// TODO: the identity pipe isn't working
-    	String script = "importPackage(com.tinkerpop.blueprints.pgm.impls.neo4j);" +
-    					"importPackage(com.tinkerpop.gremlin.java);" +
-    					"importPackage(com.tinkerpop.pipes);" +
+    	String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.impls.neo4j);" +
+    					"importPackage(Packages.com.tinkerpop.gremlin.java);" +
+    					"importPackage(Packages.com.tinkerpop.pipes);" +
     					"index = gdb.index().forNodes('node_auto_index');" +
     					"node = index.get('name','Peter').getSingle();" +
     					"vertex = Neo4jVertex(node,g);" +
@@ -634,7 +634,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
         		"{it}" +
         		".as('Pet').out('HasCareTaker').as('CareTaker').table(new Table()){it['name']}{it['name']}{it['name']}.cap";
  */
-        String script = "importPackage(com.tinkerpop.pipes.util);" +
+        String script = "importPackage(Packages.com.tinkerpop.pipes.util);" +
         				"ifFunc = function(vertex) { return vertex.getOutEdges(['HasPet']).hasNext(); };" +
         				"thenFunc = function(vertex) { return vertex.getOutEdges(['HasPet']).next().getInVertex(); };" +
         				"elseFunc = function(vertex) { return vertex; };" +

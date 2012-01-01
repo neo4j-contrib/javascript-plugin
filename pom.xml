@@ -51,11 +51,22 @@ the relevant Commercial Agreement.
   </scm>
 
   <dependencies>
-    <dependency>
-      <groupId>rhino</groupId>
-      <artifactId>js</artifactId>
-      <version>1.7R3</version>
-    </dependency>
+
+    <dependency>                                                                                                                                                               
+      <groupId>rhino</groupId>                                                                                                                                                    
+      <artifactId>js</artifactId>                                                                                                                                                 
+      <version>1.6R7</version>                                                                                                                                                       </dependency>
+
+      <!-- http://java.net/projects/scripting/sources/svn/show/trunk/engines/javascript?rev=236 -->
+    <dependency>                                                                                                                                                               
+      <groupId>com.sun.phobos.script</groupId>                                                                                                                         
+      <artifactId>js-engine</artifactId>                                                                                                                                         
+      <version>1.0</version>                                                                                                                                                      
+      <scope>system</scope>                                                                                                                                                       
+      <systemPath>${project.basedir}/lib/js-engine.jar</systemPath>                                                                                                                      
+  </dependency>
+
+
     <!-- Neo4j Dependencies -->
     <dependency>
       <groupId>org.neo4j.app</groupId>
