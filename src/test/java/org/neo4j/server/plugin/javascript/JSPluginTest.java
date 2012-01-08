@@ -33,6 +33,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.rest.repr.OutputFormat;
@@ -266,6 +267,14 @@ public class JSPluginTest
     	// Sun's Rhino was returning 2.0, but Mozilla's seems to be handling numeric strings normally
         Assert.assertEquals( "2",
                 json.format( JSPluginTest.executeTestScript( "1;\n2", null) ) );
+    }
+    
+    @Test
+    @Ignore
+    public void testMaps()
+    {
+        Assert.assertEquals( "{\"key\":\"value\"}",
+                json.format( JSPluginTest.executeTestScript( "var m = {\"key\":\"value\"}\nm", null) ) );
     }
 
     @Test
