@@ -40,8 +40,6 @@ import org.neo4j.server.rest.repr.ValueRepresentation;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 
-import com.sun.phobos.script.javascript.*;
-
 /* This is a class that will represent a server side
  * Gremlin plugin and will return JSON
  * for the following use cases:
@@ -68,25 +66,15 @@ public class JSPlugin extends ServerPlugin
 
     private ScriptEngine createQueryEngine( GraphDatabaseService neo4j )
     {
-        //final Neo4jGraph graph = new Neo4jGraph( neo4j, false );
-    	//final GremlinPipeline pipeline = new GremlinPipeline();
-       
-    	//ScriptEngine engine = new ScriptEngineManager().getEngineByName( "rhino-nonjdk" );
-   
-        // This should be the proper way to do it?
-        //ScriptEngineManager manager = new ScriptEngineManager(getClass().getClassLoader());
-        // But it'll cause:
-        // ScriptEngineManager providers.next(): javax.script.ScriptEngineFactory: Provider com.sun.script.javascript.RhinoScriptEngineFactory not found    
-        // So, we'll override this due to classpath troubles with OSGi ?
-        // See: https://scripting.dev.java.net/issues/show_bug.cgi?id=38
         ScriptEngineManager manager = new ScriptEngineManager();
-        //manager.registerEngineName("rhinomoz", new RhinoScriptEngineFactory());
         ScriptEngine engine = manager.getEngineByName("rhino-nonjdk");
-        //engine.eval("puts 'Hello World from Ruby!'");
-        //engine.eval("puts 'JSR223 !! ' + [1, 2, 'a'].inspect");
+        
+        //final Neo4jGraph graph = new Neo4jGraph( neo4j, false );
+    	//final GremlinPipeline pipeline = new GremlinPipeline();        
     	//engine.getContext().setAttribute("g", graph, ScriptContext.ENGINE_SCOPE);
     	//engine.getContext().setAttribute("pipe", pipeline, ScriptContext.ENGINE_SCOPE);
-    	return engine;
+
+        return engine;
     }
 
     @Name( "execute_script" )
@@ -97,14 +85,12 @@ public class JSPlugin extends ServerPlugin
             @Description( "The Gremlin script" ) @Parameter( name = "script", optional = false ) final String script,
             @Description( "JSON Map of additional parameters for script variables" ) @Parameter( name = "params", optional = true ) final Map params )
     {
-
         try
         {
             engineReplacementDecision.beforeExecution( script );
 
             final Bindings bindings = createBindings( neo4j, params );
-
-            
+        
             final Object result = engine(neo4j).eval( script, bindings );
             return gremlinToRepresentationConverter.convert( result );
         }
@@ -127,7 +113,7 @@ public class JSPlugin extends ServerPlugin
     private Bindings createInitialBinding( GraphDatabaseService neo4j )
     {
         final Bindings bindings = new SimpleBindings();
-        // moved initial bindings to engine scope
+        // TODO: consider moving initial bindings to engine scope
         final Neo4jGraph graph = new Neo4jGraph( neo4j, false );
     	final GremlinPipeline pipeline = new GremlinPipeline();
         bindings.put( g, graph );

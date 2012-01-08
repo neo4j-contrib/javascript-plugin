@@ -19,11 +19,12 @@
  */
 package org.neo4j.server.plugin.javascript;
 
+import scala.actors.threadpool.Arrays;
+//import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-//import sun.org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeArray;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -42,9 +43,6 @@ import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.pipes.util.Table;
 
-// Peter, did you change this from Java Arrays to sc
-//import scala.actors.threadpool.Arrays;
-import java.util.Arrays;
 
 public class JSToRepresentationConverter
 {
@@ -67,7 +65,6 @@ public class JSToRepresentationConverter
             Iterator iterator = (Iterator) data;
             return getIteratorRepresentation( iterator );
         }
-        // added for the JavaScript plugin - James 
         if ( data instanceof NativeArray )
         {	
         	NativeArray na = (NativeArray) data;

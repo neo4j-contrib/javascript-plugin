@@ -42,9 +42,20 @@ import org.neo4j.test.GraphDescription.REL;
 import org.neo4j.test.TestData.Title;
 import org.neo4j.visualization.asciidoc.AsciidocHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.google.gson.Gson;
+
 public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
 {
     private static final String ENDPOINT = "http://localhost:7474/db/data/ext/JSPlugin/graphdb/execute_script";
+    
+    private String doRestCall( String script, Status status, Pair<String, String>... params )
+    {
+        // TODO Auto-generated method stub
+        return super.doGremlinRestCall( ENDPOINT, script, status, params );
+    }
+    
     
     /**
      * Scripts can be sent as URL-encoded In this example, the graph has been
@@ -58,18 +69,22 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     {
         data.get();
         //String script = "g.idx('node_auto_index')[[name:'I']].out";
-    	
-        String script = "index = gdb.index().forNodes('node_auto_index');" +
-        				"node = index.get('name','I').getSingle();" +
-        				"id = node.getId();" +
-						"pipe.start(g.getVertex(id)).out([]);";
-
-        gen().expectedStatus( Status.OK.getStatusCode() ).description(
-                formatGroovy( script ) );
-        String response = gen().payload(
-                "script=" + URLEncoder.encode( script, "UTF-8" ) ).payloadType(
-                MediaType.APPLICATION_FORM_URLENCODED_TYPE ).post( ENDPOINT ).entity();
-        System.out.print(response);
+    	        
+        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.impls.neo4j);" +
+        				"var index = gdb.index().forNodes('node_auto_index');" +
+        				"var node = index.get('name','I').getSingle();" +
+    					"var vertex = Neo4jVertex(node,g);" +
+						"pipe.start(vertex).out([]);";
+        
+        //HashMap map = new java.util.HashMap();
+        
+        String payload =  "script=" + URLEncoder.encode( script, "UTF-8" );
+        MediaType payloadType = MediaType.APPLICATION_FORM_URLENCODED_TYPE;
+        
+        gen().expectedStatus( Status.OK.getStatusCode() ).description( formatGroovy( script ) );
+        String response = gen().payload(payload).payloadType(payloadType).post( ENDPOINT ).entity();   
+        
+        //System.out.print(response);
         assertTrue( response.contains( "you" ) );
     }
 
@@ -77,6 +92,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * Send a Gremlin Script, URL-encoded with UTF-8 encoding, with additional
      * parameters.
      */
+    // evidently URL params isn't supported -- only JSON?
     @Title( "Send a Gremlin Script with variables in a JSON Map - URL encoded" )
     @Documented
     @Graph( value = { "I know you" } )
@@ -87,6 +103,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
         //final String script = "g.v(me).out;";
     	final String script = "pipe.start(g.getVertex(me)).out()";
         final String params = "{\"me\":" + data.get().get( "I" ).getId() + "}";
+
         
         gen().description( formatGroovy( script ) );
         String response = gen().expectedStatus( Status.OK.getStatusCode() ).payload(
@@ -109,22 +126,12 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
             throws UnsupportedEncodingException
     {
     	//final String script = "g.v(me).out";
-    	final String script = "pipe.start(g.getVertex(me)).out([])";
-        String response = doRestCall( script, Status.OK,
-                Pair.of( "me", data.get().get( "I" ).getId() + "" ) );
-        System.out.print(response);
+    	String script = "pipe.start(g.getVertex(me)).out([]);";
+    	Pair<String, String> params = Pair.of( "me", data.get().get( "I" ).getId() + "");
+    	
+        String response = doRestCall( script, Status.OK, params);
         assertTrue( response.contains( "you" ) );
     }
-
-    private String doRestCall( String script, Status status,
-            Pair<String, String>... params )
-    {
-        // TODO Auto-generated method stub
-        return super.doGremlinRestCall( ENDPOINT, script, status, params );
-    }
-
-    
-
     
     
     /**
@@ -133,7 +140,6 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * imports a small GraphML file from an URL into Neo4j, resulting in the
      * depicted graph. It then returns a list of all nodes in the graph.
      */
-    @Ignore // script engine doesn't have the required imports
     @Test
     @Documented
     @Title( "Load a sample graph" )
@@ -141,11 +147,12 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     {
         //String script = "g.loadGraphML('https://raw.github.com/neo4j/gremlin-plugin/master/src/data/graphml1.xml');" +
         //                "g.V;";
-        String script = "url = 'https://raw.github.com/neo4j/gremlin-plugin/master/src/data/graphml1.xml';" +
-        				"GraphMLReader.inputGraph(g, new URL(url).openStream());" +
+        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.util.graphml);" +
+        				"url = 'https://raw.github.com/neo4j/gremlin-plugin/master/src/data/graphml1.xml';" +
+        				"GraphMLReader.inputGraph(g, new java.net.URL(url).openStream());" +
         				"pipe.start(g).V()";       	
         String response = doRestCall( script, Status.OK );
-        //System.out.print(response);
+        System.out.println(response);
         assertTrue( response.contains( "you" ) );
         assertTrue( response.contains( "him" ) );
     }
@@ -153,17 +160,17 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     /**
      * Exporting a graph can be done by simple emitting the appropriate String.
      */
-    @Ignore // script engine doesn't have the required imports
+    @Test
     @Documented
     @Title( "Emit a sample graph" )
     @Graph( value = { "I know you", "I know him" } )
     public void emitGraph() throws UnsupportedEncodingException
     {
-        String script = "writer = new GraphMLWriter(g);"
-                        + "out = new java.io.ByteArrayOutputStream();"
-                        + "writer.outputGraph(out);"
-                        + "result = out.toString();";
-        // same code for Gremlin Java
+        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.util.graphml);" +
+        				"writer = new GraphMLWriter(g);" +
+        				"out = new java.io.ByteArrayOutputStream();" +
+                        "writer.outputGraph(out);" +
+                        "result = out.toString();"; 
         String response = doRestCall( script, Status.OK );
         assertTrue( response.contains( "graphml" ) );
         assertTrue( response.contains( "you" ) );
@@ -181,12 +188,21 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     public void setVariables() throws UnsupportedEncodingException
     {
         String script = "meaning_of_life";
-        String payload = "{\"script\":\"" + script + "\","
-                         + "\"params\":{\"meaning_of_life\" : 42.0}}";
+
+        Map<String, Object> params = new HashMap<String, Object>();        
+        params.put("meaning_of_life", 42.0);
+
+        Map<String, Object> payload = new HashMap<String, Object>();
+        payload.put("script",script);
+        payload.put("params",params);
+        
         description( formatGroovy( script ) );
-        String response = gen().expectedStatus( Status.OK.getStatusCode() ).payload(
-                JSONPrettifier.parse( payload ) ).payloadType(
-                MediaType.APPLICATION_JSON_TYPE ).post( ENDPOINT ).entity();
+        String response = gen()
+        					.expectedStatus( Status.OK.getStatusCode() )
+        					.payload( new Gson().toJson( payload ) )
+        					.payloadType( MediaType.APPLICATION_JSON_TYPE )
+        					.post( ENDPOINT )
+        					.entity();
         assertTrue( response.contains( "42.0" ) );
     }
 
@@ -200,26 +216,23 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     @Graph( value = { "I know you", "I know him" }, autoIndexNodes = true )
     public void testSortResults() throws UnsupportedEncodingException
     {
-
-    	
-        data.get();
         // String script = "g.idx('node_auto_index')[[name:'I']].out.sort{it.name}";
 
         // NOTE: this sort assertion has been commented out -- still looking for a clean way to do sorts
-        String script = "index = gdb.index().forNodes('node_auto_index');" +
+        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.impls.neo4j.util);" +
+        				"index = gdb.index().forNodes('node_auto_index');" +
         				"ids = new java.util.ArrayList();" +
         				"hits = index.get('name','I');" +
-						"while (hits.hasNext()) { node = hits.next(); id = node.getId(); ids.add(g.getVertex(id)); };" +
-						"nodesObj = pipe.start(ids).out([]);";
+        				"sequence = Neo4jVertexSequence(hits,g);" +
+						"nodesObj = pipe.start(sequence).out([]);";
         
 						//"var nodesArray = [];" +
 						//"while (nodesObj.hasNext()) { nodesArray.push(nodesObj.next()); }; " +
 						//"function nameSort(a,b) {return a.name-b.name;};" +
 						//"nodesArray.sort(nameSort);";
-
         
         String response = doRestCall( script, Status.OK );
-        System.out.println(response);
+        //System.out.println(response);
         assertTrue( response.contains( "you" ) );
         assertTrue( response.contains( "him" ) );
         //assertTrue( response.indexOf( "you" ) > response.indexOf( "him" ) );
@@ -239,7 +252,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
         //String script = "g.v(%I%).out.name.paths";
         String script = "pipe.start(g.getVertex(%I%)).out([]).property('name').path([])";
         String response = doRestCall( script, Status.OK );
-        System.out.print(response);
+        //System.out.print(response);
         assertTrue( response.contains( "you" ) );
         assertTrue( response.contains( "him" ) );
     }
@@ -263,7 +276,6 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * populate the result table +t+, iterate through the pipes with
      * +iterate()+.
      */
-    @Ignore // tables not implemented yet
     @Test
     @Title( "Send a Gremlin Script - JSON encoded with table results" )
     @Documented
@@ -271,14 +283,24 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
             "Joe like dogs" } )
     public void testGremlinPostJSONWithTableResult()
     {
-        String script = "t= new Table();"
-                        + "g.v(%I%).as('I').out('know').as('friend').out('like').as('likes').table(t,['friend','likes']){it.name}{it.name}.iterate();t;";
-
     	//String script = "t = new Table();" +
     	//				"pipe.start(g.getVertex(%I%)).as('I').out('know').as('friend').out('like').as('likes').table(t,['friend','likes']){it.name}{it.name}.iterate();" +
     	//				"return t";
+    	
+    	String script = "importPackage(Packages.com.tinkerpop.pipes.util);" +
+        				"t = new Table();" +
+        				"stepNames = new java.util.ArrayList();" +
+        				"stepNames.add('friend');" +
+        				"stepNames.add('likes');" + 
+        				"columnFunc = function(vertex) { return vertex.getProperty('name'); };" +
+                        "pipe.start(g.getVertex(%I%)).as('I')." +
+                        "out(['know']).as('friend')." +
+                        "out(['like']).as('likes')." +
+            			"table(t,stepNames,[columnFunc,columnFunc]).iterate();" +
+                        "t;";
+
         String response = doRestCall( script, Status.OK );
-        System.out.print(response);
+        //System.out.print(response);
         assertTrue( response.contains( "cats" ) );
     }
 
@@ -287,13 +309,17 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * serialized according to the recursive resolution of the pipe elements, as
      * shown below.
      */
-    @Ignore // tables not implemented yet
     @Test
     @Graph( value = { "I know Joe", "I like cats", "Joe like cats",
             "Joe like dogs" } )
     public void returning_nested_pipes()
     {
-        String script = "g.v(%I%).as('I').out('know').as('friend').out('like').as('likes').table(new Table()){it.name}{it.name}.cap;";
+        String script = "importPackage(Packages.com.tinkerpop.pipes.util);" +
+        				"columnFunc = function(vertex) { return vertex.getProperty('name'); };" +
+        				"pipe.start(g.getVertex(%I%)).as('I')." +
+        				"out(['know']).as('friend')." +
+        				"out(['like']).as('likes')." +
+        				"table(new Table(),[columnFunc,columnFunc]).cap();";
         String response = doRestCall( script, Status.OK );
         assertTrue( response.contains( "cats" ) );
     }
@@ -314,24 +340,6 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
             "Joe like dogs" } )
     public void sendArbtiraryGroovy()
     {
-/*        String script = "import org.neo4j.graphdb.index.*;" +
-                        "import org.neo4j.index.lucene.*;" +
-                        "import org.apache.lucene.search.*;" +
-                        "neo4j = g.getRawGraph();" +
-                        "tx = neo4j.beginTx();" +
-                        "meVertex = g.addVertex([name:'me']);" +
-                        "meNode = meVertex.getRawVertex();" +
-                        "youNode = neo4j.createNode();" +
-                        "youNode.setProperty('name','you');" +
-                        "idxManager = neo4j.index();" +
-                        "personIndex = idxManager.forNodes('persons');" +
-                        "personIndex.add(meNode,'name',meVertex.name);" +
-                        "personIndex.add(youNode,'name',youNode.getProperty('name'));" +
-                        "tx.success();" +
-                        "tx.finish();" +
-                        "query = new QueryContext( 'name:*' ).sort( new Sort(new SortField( 'name',SortField.STRING, true ) ) );" +	                     
-                        "results = personIndex.query( query );"; */
-
         String script = "importPackage(Packages.org.neo4j.graphdb.index);" +
                 		"importPackage(Packages.org.neo4j.index.lucene);" +
                 		"importPackage(Packages.org.apache.lucene.search);" +
@@ -348,28 +356,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
                 		"tx.success();" +
                 		"tx.finish();" +
                         "query = new QueryContext( 'name:*' ).sort( new Sort(new SortField( 'name',SortField.STRING, true ) ) );" +	                     
-                        "results = personIndex.query( query );" ;
-        
-        // this script is causing something to hang
-        
-/*    	String script = "import org.neo4j.graphdb.index.*;" +
-    					"import org.neo4j.index.lucene.*;" +
-    					"import org.apache.lucene.search.*;" +
-    					"neo4j = g.getRawGraph();" +
-    					"tx = neo4j.beginTx();" +
-    					"meVertex = neo4j.createNode();" +
-    					"meVertex.setProperty('name','me');" +
-    					"youNode = neo4j.createNode();" +
-    					"youNode.setProperty('name','you');" +
-    					"idxManager = neo4j.index();" +
-    					"personIndex = idxManager.forNodes('persons');" +
-    					"personIndex.add(meNode,'name',meVertex.name);" +
-    					"personIndex.add(youNode,'name',youNode.getProperty('name'));" +
-    					"tx.success();" +
-    					"tx.finish();" +
-    					"query = new QueryContext( 'name:*' ).sort( new Sort(new SortField( 'name',SortField.STRING, true ) ) );" +
-    					"results = personIndex.query( query );"; */
-        
+                        "results = personIndex.query( query );" ;                
         String response = doRestCall( script, Status.OK );
         System.out.println(response);
         assertTrue( response.contains( "me" ) );
@@ -389,7 +376,6 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * 'Group2'), the following script can traverse this HyperEdge node and
      * provide answers.
      */
-    //@Ignore // I have no idea what's going on with this one -- won't emit edges
     @Test
     @Title( "HyperEdges - find user roles in groups" )
     @Documented
@@ -402,31 +388,15 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
             "U1G1R2 hasRole Role2", "U1G1R2 hasGroup Group1" } )
     public void findGroups()
     {
-/*        String script = "" + "g.v(%User1%)"
-                        + ".out('hasRoleInGroup').as('hyperedge')."
-                        + "out('hasGroup').filter{it.name=='Group2'}."
-                        + "back('hyperedge').out('hasRole').name";*/
-        
-/*        String script = "pipe.start(g.getVertex(%User1%))." +
-                		"out('hasRoleInGroup').as('hyperedge')." +
-                   		"out('hasGroup').filter(new PipeFunction<Vertex,Boolean>() {" +
-                        "  public Boolean compute(Vertex argument) {" +
-                        "    return argument.getProperty('name') == 'Group2';" +
-                        "  }" +
-                        "}).back('hyperedge').out('hasRole').property('name')";*/
-
         String script = "filterFunc = function(vertex) { return vertex.getProperty('name') == 'Group2' };" +
-        				"pipe.start(g.getVertex(%User1%))." +
-        				"out(['hasRoleInGroup']).as('hyperedge')." +
-        				"out(['hasGroup']).filter(filterFunc)." +
-        				"back('hyperedge').out(['hasRole']).property('name')";
-        
+        				"pipe.start(g.getVertex(%User1%))" +
+        				".out(['hasRoleInGroup']).as('hyperedge')" +
+        				".out(['hasGroup']).filter(filterFunc)" +
+        				".back('hyperedge').out(['hasRole']).property('name')";
         String response = doRestCall( script, Status.OK );
-        System.out.print(response);
-
+        //System.out.print(response);
         assertTrue( response.contains( "Role1" ) );
         assertFalse( response.contains( "Role2" ) );
-
     }
 
     /**
@@ -439,49 +409,46 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     @Graph( { "Peter knows Ian", "Ian knows Peter", "Peter likes Bikes" } )
     public void group_count() throws UnsupportedEncodingException, Exception
     {
-/*        String script = "m = [:];"
-                        + "g.v(%Peter%).bothE().label.groupCount(m).iterate();m";*/
-        
-        String script = "m = new java.util.HashMap();" +
+    	String script = "m = new java.util.HashMap();" +
                 		"pipe.start(g.getVertex(%Peter%)).bothE([]).label().groupCount(m).iterate();" +
-                		"m";
-                       
+                		"m";               
         String response = doRestCall( script, Status.OK );
-        System.out.println(response);
+       // System.out.println(response);
         assertTrue( response.contains( "knows=2" ) );
     }
 
     /**
-     * This example is showing a group count in Germlin, for instance the
+     * This example is showing a group count in Gremlin, for instance the
      * counting of the different relationship types connected to some the start
      * node. The result is collected into a variable that then is returned.
      * 
      * @@graph1
      */
+    //@Ignore // until we have an each() step
     @Test
     @Documented
     @Graph( { "Peter knows Ian", "Ian knows Peter", "Peter likes Bikes" } )
     public void modify_the_graph_while_traversing()
             throws UnsupportedEncodingException, Exception
     {
-        data.get();
-        gen().addSnippet(
-                "graph1",
-                AsciidocHelper.createGraphViz( "Starting Graph", graphdb(),
-                        "starting_graph" + gen.get().getTitle() ) );
+        String name = "starting_graph" + gen.get().getTitle();
+        String graphViz = AsciidocHelper.createGraphViz( "Starting Graph", graphdb(), name );
+        gen().addSnippet( "graph1", graphViz);
+        
         assertTrue( getNode( "Peter" ).hasRelationship() );
         
-         String script = "g.v(%Peter%).bothE.each{g.removeEdge(it)}";
-/*        String script = "pipe.start(g.v(%Peter%)).bothE().each{g.removeEdge(it)}";
+        // String script = "g.v(%Peter%).bothE.each{g.removeEdge(it)}";
+        String script = "removeFunc = function(edge) { g.removeEdge(edge); };" +
+        				"pipe.start(g.getVertex(%Peter%)).bothE([]).transform(removeFunc);";
         String response = doRestCall( script, Status.OK );
-        assertFalse( getNode( "Peter" ).hasRelationship() );*/
+        //System.out.println(response);
+        assertFalse( getNode( "Peter" ).hasRelationship() );
     }
 
     /**
      * Multiple traversals can be combined into a single result, using splitting
      * and merging pipes in a lazy fashion.
      */
-    @Ignore // _() isn't working
     @Test
     @Documented
     @Graph( value = { "Peter knows Ian", "Ian knows Peter", "Marie likes Peter" }, autoIndexNodes = true )
@@ -490,25 +457,20 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     {
         // String script = "g.idx('node_auto_index')[[name:'Peter']].copySplit(_().out('knows'), _().in('likes')).fairMerge.name";
     	
-//        String script = "index = gdb.index().forNodes('node_auto_index');" +
-//				"node = index.get('name','I').getSingle();" +
-//				"id = node.getId();" +
-//				"pipe.start(g.getVertex(id)).out([]);";
-//    	
-    	// using inE() instead of in() because "in" is a reserved keyword in JavaScript
-    	// TODO: the identity pipe isn't working
-    	String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.impls.neo4j);" +
-    					"importPackage(Packages.com.tinkerpop.gremlin.java);" +
-    					"importPackage(Packages.com.tinkerpop.pipes);" +
-    					"index = gdb.index().forNodes('node_auto_index');" +
-    					"node = index.get('name','Peter').getSingle();" +
-    					"vertex = Neo4jVertex(node,g);" +
-    					"pipe.start(vertex)." +
-    					"copySplit([_().out(['knows']),_().inE(['likes']).outV()])." +
-    					"outV().fairMerge().property('name');";	
+    	// using inE().outV() instead of in() because "in" is a reserved word in JavaScript
+    	String script =	"importPackage(Packages.com.tinkerpop.gremlin.java);" +
+    					"importPackage(Packages.com.tinkerpop.pipes.transform);" +
+    					"importPackage(Packages.com.tinkerpop.blueprints.pgm.impls.neo4j);" +
+    					"_ = function(vertex) { return GremlinPipeline().start(vertex); } ;" +
+    					"var index = gdb.index().forNodes('node_auto_index');" +
+    					"var node = index.get('name','Peter').getSingle();" +
+    					"var vertex = Neo4jVertex(node,g);" +
+    					"pipe.start(vertex)" +    	
+    					".copySplit([_().out(['knows']),_().inE(['likes']).outV()])" +
+    					".fairMerge().property('name');";	
     	
         String response = doRestCall( script, Status.OK );
-        System.out.println(response);
+        //System.out.println(response);
         assertTrue( response.contains( "Marie" ) );
         assertTrue( response.contains( "Ian" ) );
     }
@@ -540,7 +502,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
         String script = "filterFunc = function(vertex) { return vertex.getProperty('name') == 'Sara'; };" +
         				"pipe.start(g.getVertex(%George%)).out(['knows']).filter(filterFunc).next(100)"; // [0..100]
         String response = doRestCall( script, Status.OK );
-        System.out.print(response);
+        //System.out.print(response);
         assertTrue( response.contains( "Sara" ) );
         assertFalse( response.contains( "Ian" ) );
     }
@@ -572,7 +534,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
         //String script = "g.v(%George%).out().paths()";
     	String script = "pipe.start(g.getVertex(%George%)).out([]).path([])";
         String response = doRestCall( script, Status.OK );
-        System.out.println(response);
+        //System.out.println(response);
         assertTrue( response.contains( "Ian" ) );
         assertTrue( response.contains( "Sara" ) );
     }
@@ -657,8 +619,8 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * 
      * @@graph1
      */
-    @Ignore // not sure on this one yet
-    @Documented
+    @Ignore
+    @Documented 
     @Test
     @Graph( nodes = { @NODE( name = "source", setNameProperty = true ),
             @NODE( name = "middle", setNameProperty = true ),
@@ -670,50 +632,85 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     public void flow_algorithms_with_Gremlin()
             throws UnsupportedEncodingException
     {
+    	
+    	// See http://neo4j.org/nabble/#nabble-td3518678
+    	
+    	
+//      String script = "source=pipe.start(g.v(%source%));" +
+//		"sink=pipe.start(g.v(%sink%));" +
+//		"maxFlow = 0;" +
+//		"source.outE().inV().loop(2,new PipeFunction<Object,Boolean>() {" +
+//		"  public Boolean compute(Object it) {" +
+//		"    return !it.equals(sink);" +
+//		"  }" +
+//		"}).path().each{" +
+//		"flow = it.capacity.min(); " +
+//		"maxFlow += flow;" +
+//		"it.findAll{it.capacity}.each{it.capacity -= flow}};" +
+//		"return maxFlow;";
+    	
         data.get();
         gen().addSnippet(
                 "graph1",
                 AsciidocHelper.createGraphViz( "Starting Graph", graphdb(),
                         "starting_graph" + gen.get().getTitle() ) );
-/*        String script = "source=g.v(%source%);sink=g.v(%sink%);maxFlow = 0;"
-                        + "source.outE.inV.loop(2){!it.object.equals(sink)}.paths.each{"
-                        + "flow = it.capacity.min(); "
-                        + "maxFlow += flow;"
-                        + "it.findAll{it.capacity}.each{it.capacity -= flow}};maxFlow";*/
+                
+/*        String script = "source=g.v(%source%);
+ * 						+ "sink=g.v(%sink%);
+ * 						+ "maxFlow = 0;"
+                        + "source.outE.inV.loop(2){!it.object.equals(sink)}
+                        + ".paths.each{"
+                        + "	  flow = it.capacity.min(); "
+                        + "   maxFlow += flow;"
+                        + "	  it.findAll{it.capacity}.each{it.capacity -= flow}
+                        + "};" 
+                        + "maxFlow";*/
         
-//        String script = "source=pipe.start(g.v(%source%));" +
-//        				"sink=pipe.start(g.v(%sink%));" +
-//        				"maxFlow = 0;" +
-//        				"source.outE().inV().loop(2,new PipeFunction<Object,Boolean>() {" +
-//        				"  public Boolean compute(Object it) {" +
-//        				"    return !it.equals(sink);" +
-//        				"  }" +
-//        				"}).path().each{" +
-//        				"flow = it.capacity.min(); " +
-//        				"maxFlow += flow;" +
-//        				"it.findAll{it.capacity}.each{it.capacity -= flow}};" +
-//        				"return maxFlow;";
+// 						"pathFunc = function(path) { flow = path.capacity.min(); maxFlow += flow; };" +
         
-        String script = "source=pipe.start(g.getVertex(%source%));" +
-        				"sink=pipe.start(g.getVertex(%sink%));" +
-        				"maxFlow = 0;" +
-        				"loopFunc = function(vertex) { return vertex != sink };" +
-        				"pathFunc = function(vertex) { flow = vertex.capacity.min(); maxFlow += flow; };" +
-        				"sideEffectFunc = function(paths) { " +
-        				"	flow = paths.capacity.min(); " +
-        				"	maxFlow += flow; " +
-        				"	for (var path in paths) { }" +
-        				"	it.findAll{.capacity}.each{it.capacity -= flow}; " +
-        				"};" +
-        				"source.out([]).loop(2,loopFunc).path([]).sideEffect(sideEffectFunc);" +
-        				"maxFlow;";
+        String script = "var source = g.getVertex(%source%);" +
+						"var sink = g.getVertex(%sink%);" +
+						"var maxFlow = 0;" +
+						"loopFunc = function(vertex) { return vertex.object.id != sink.id; };" +
+						"capacityFunc = function(edge) { return edge.capacity; }; " +
+						"sideEffectFunc = function(path) { " +
+						"   capacities = path.object.map(capacityFunc).get(); " + 
+						"	flow = Math.min.apply(Math,capacities); " +
+						"	maxFlow += flow; " +
+						"	for (var element in path) { " +
+						"		if ( element.hasOwnProperty('capacity') ) { " +
+						"			element.capacity -= flow; " +
+						"		};" +
+						"	};" +
+						"   return true; " +
+						"};" +
+						"pipe.start(source).outE([]).inV().loop(2,loopFunc).path([]).sideEffect(sideEffectFunc);";
+				
+                		
+//        				"//maxFlow;";
+        
+//        String script = "var source=pipe.start(g.getVertex(%source%));" +
+//        				"var sink=pipe.start(g.getVertex(%sink%));" +
+//        				"var maxFlow = 0;" +
+//        				"loopFunc = function(vertex) { return vertex != sink };" +
+//        				"pathFunc = function(path) { flow = path.capacity.min(); maxFlow += flow; };" +
+//        				"transformFunc = function(path) { " +
+//        				"	flow = path.capacity.min(); " +
+//        				"	maxFlow += flow; " +
+//        				"	while (paths.hasNext()) { if ( paths.next() }" +
+//        				"	it.findAll{it.capacity}.each{it.capacity -= flow}; " +
+//        				"};" +
+//        				"source.out([]).loop(1,loopFunc).path([]);" +
+
        
         String response = doRestCall( script, Status.OK );
         assertTrue( response.contains( "4" ) );
     }
 
+    // Ignored for now: use the Rhino engine's invokefunction() to reuse scripts between requests 
+    // See http://docs.oracle.com/javase/6/docs/technotes/guides/scripting/programmer_guide/index.html
+    @Ignore 
     @Test
-    @Ignore
     @Graph( value = { "Peter knows Ian", "Ian knows Peter", "Marie likes Peter" }, autoIndexNodes = true, autoIndexRelationships = true )
     public void test_Gremlin_load()
     {
@@ -750,63 +747,97 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
                         "};" + 
                         "Object.metaClass.makeEdge = edge;";*/
         
-        String script = "//neo4j = g.getRawGraph();" +
-        				"nodeIndex = g.idx('node_auto_index');" +
-        				"edgeIndex = g.idx('relationship_auto_index');" +
-        				"node = { uri, properties -> " +
-        				"  existing = nodeIndex.get('uri', uri);" +
-        				"  properties['uri'] = uri;" +
-        				"  if (existing) {    " +
-        				"    return existing[0];  " +
-        				"  } else {" +
-        				"    n = neo4j.createNode(); " +
-        				"    for (entry in properties.entrySet()) {" +
-        				"       n.setProperty(entry.key,entry.value); " +
-        				"    };" +
-        				"  };" +
-        				"};" +
-        				"Object.metaClass.makeNode = node;" +
-        				"edge = { type, source_uri, target_uri, properties ->" +
-        				"  source = nodeIndex.get('uri', source_uri).iterate();" +
-        				"  target = nodeIndex.get('uri', target_uri).iterate();" +
-        				"  nodeKey = source.id + '-' + target.id;" +
-        				"  existing = edgeIndex.get('nodes', nodeKey);" +
-        				"  if (existing) {" + 
-        				"    return existing;" + 
-        				"  };" +
-        				"  properties['nodes'] = nodeKey;" +
-        				"  r = source.createRelationshipTo(target,type);" +
-        				"  for (entry in properties.entrySet()) {" +
-        				"    r.setProperty(entry.key,entry.value);" + 
-        				"  };" +
-                		"};" + 
-                		"Object.metaClass.makeEdge = edge;";
         
+        String initScript = "importPackage(Packages.com.tinkerpop.blueprints.pgm);" +
+        					"var neo4j = g.getRawGraph();" +
+        					"var nodeIndex = gdb.index().forNodes('node_auto_index');" +
+        					"var edgeIndex = gdb.index().forRelationships('relationship_auto_index');" +
+        					"makeNode = function( uri, properties) {" +
+        					"  var existing = nodeIndex.get('uri', uri);" +
+        					"  if (existing.hasNext()) {    " +
+        					"    return existing.next();  " +
+        					"  }" +
+        					"  g.setMaxBufferSize(0); " +
+        					"  g.startTransaction(); " +
+        					"  properties['uri'] = uri;" +
+        					"  var node = neo4j.createNode(); " +
+        					"  for (var key in properties) {" +
+        					"    if (properties.hasOwnProperty(key)) {" +
+        					"      node.setProperty(key,properties[key]);" +
+        					"    };" + 
+        					"  };" +
+        					"  g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);" +
+        					"  return node;" + 
+        					"};" +
+        					"makeEdge = function(type, source_uri, target_uri, properties) {" +
+        					"  var source = nodeIndex.get('uri', source_uri).iterate();" +
+        					"  var target = nodeIndex.get('uri', target_uri).iterate();" +
+        					"  var nodeKey = source.id + '-' + target.id;" +
+        					"  var existing = edgeIndex.get('nodes', nodeKey);" +
+        					"  if (existing.hasNext()) {" + 
+        					"    return existing.next();" + 
+        					"  };" +
+        					"  g.setMaxBufferSize(0); " +
+        					"  g.startTransaction(); " +
+        					"  properties['nodes'] = nodeKey;" +
+        					"  relationship = source.createRelationshipTo(target,type);" +
+        					"  for (var key in properties) {" +
+        					"    if (properties.hasOwnProperty(key)) {" +
+        					"      relationship.setProperty(key,properties[key]);" +
+        					"    };" + 
+        					"  };" +
+        					"  g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);" +
+        					"  return relationship;" +
+        					"};";
+          
+        description( formatGroovy( initScript ) );
         
-        String payload = "{\"script\":\"" + script + "\"}";
+        Map<String, Object> initPayload = new HashMap<String, Object>();
+        initPayload.put("script", initScript);
+                
+        String initResponse = gen.get()
+        						 .expectedStatus( Status.OK.getStatusCode() )
+        						 .payload(  new Gson().toJson( initPayload ) )
+        						 .post( ENDPOINT )
+        						 .entity();
         
-        description( formatGroovy( script ) );
-        gen.get().expectedStatus( Status.OK.getStatusCode() ).payload(
-                JSONPrettifier.parse( payload ) );
-        String response = gen.get().post( ENDPOINT ).entity();
+        System.out.println(initResponse);
+        
         for ( int i = 0; i < 1000; i++ )
         {
-            String uri = "uri" + i;
-            payload = "{\"script\":\"n = Object.metaClass.makeNode('" + uri + "',[:]\"}";
-            gen.get().expectedStatus( Status.OK.getStatusCode() ).payload(
-                    JSONPrettifier.parse( payload ) );
-            response = gen.get().post( ENDPOINT ).entity();
-            assertTrue( response.contains( uri ) );
+            String nodeUri = "uri" + i;
+            String nodeScript = String.format("makeNode('%s',{});", nodeUri);
+            
+            Map<String, Object> nodePayload = new HashMap<String, Object>();
+            nodePayload.put("script", nodeScript);
+                        
+            String nodeResponse = gen.get()
+            						 .expectedStatus( Status.OK.getStatusCode() )
+            						 .payload( new Gson().toJson( nodePayload ) )
+            						 .post( ENDPOINT )
+            						 .entity();
+            
+            System.out.println(nodeResponse);
+            assertTrue( nodeResponse.contains( nodeUri ) );
         }
+        
         for ( int i = 0; i < 999; i++ )
         {
-            String uri = "uri";
-            payload = "{\"script\":\"n = Object.metaClass.makeEdge('knows','"
-                      + uri + i + "','" + uri + ( i + 1 ) + "'[:]\"}";
-            gen.get().expectedStatus( Status.OK.getStatusCode() ).payload(
-                    JSONPrettifier.parse( payload ) );
-            response = gen.get().post( ENDPOINT ).entity();
-            assertTrue( response.contains( uri ) );
+        	String baseUri = "uri";
+            String sourceUri = baseUri + i;
+            String targetUri = baseUri + (i + 1);
+            String edgeScript = String.format("makeEdge('knows','%s', '%s', {});", sourceUri, targetUri); 
+            
+            Map<String, Object> edgePayload = new HashMap<String, Object>();
+            edgePayload.put("script", edgeScript);
+            
+            String edgeResponse = gen.get()
+        							 .expectedStatus( Status.OK.getStatusCode() )
+        							 .payload( new Gson().toJson( edgePayload ) )
+        							 .post( ENDPOINT )
+        							 .entity();
+            System.out.println(edgeResponse);
+            assertTrue( edgeResponse.contains( baseUri ) );
         }
     }
 }

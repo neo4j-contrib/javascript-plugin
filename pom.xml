@@ -16,7 +16,8 @@
   <properties>
     <!-- Jar Versions -->
     <spring.version>3.0.4.RELEASE</spring.version>
-    <jackson.version>1.5.2</jackson.version>
+    <!-- jackson.version>1.5.2</jackson.version -->
+    <jackson.version>1.9.2</jackson.version>
     <cxf.version>2.3.1</cxf.version>
     <servlet-api.version>2.5</servlet-api.version>
     <neo4j.version>1.6-SNAPSHOT</neo4j.version>
@@ -50,13 +51,13 @@ the relevant Commercial Agreement.
     <developerConnection>scm:git:git@github.com:espeed/gremlin-rhino-plugin.git</developerConnection>
     <url>https://github.com/espeed/gremlin-rhino-plugin</url>
   </scm>
-
+  
   <dependencies>
-
+    
     <dependency>                                                                                                                                                               
       <groupId>rhino</groupId>                                                                                                                                                    
       <artifactId>js</artifactId>                                                                                                                                                 
-      <version>1.6R7</version>                                                                                                                                                       </dependency>
+      <version>1.6R7</version>                                                                                                                                                        </dependency>
 
       <!-- http://java.net/projects/scripting/sources/svn/show/trunk/engines/javascript?rev=236 -->
     <dependency>                                                                                                                                                               
@@ -64,9 +65,15 @@ the relevant Commercial Agreement.
       <artifactId>js-engine</artifactId>                                                                                                                                         
       <version>1.0</version>                                                                                                                                                      
       <scope>system</scope>                                                                                                                                                       
-      <systemPath>${project.basedir}/lib/js-engine.jar</systemPath>                                                                                                                      
-  </dependency>
+      <systemPath>${project.basedir}/lib/js-engine.jar</systemPath>                                                                                                                   </dependency>
 
+    <!--  Gson: Java to Json conversion -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.0</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- Neo4j Dependencies -->
     <dependency>
