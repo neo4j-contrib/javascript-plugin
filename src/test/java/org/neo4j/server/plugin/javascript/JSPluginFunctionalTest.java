@@ -105,7 +105,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     @Title( "Send a Gremlin Script with variables in a JSON Map - URL encoded" )
     @Documented
     @Graph( value = { "I know you" } )
-    public void testGremlinPostWithVariablesURLEncoded()
+    public void testGremlinPostWithVariablesURLEncoded() 
             throws UnsupportedEncodingException
     {
     	data.get();
