@@ -263,12 +263,8 @@ public class JSPluginTest
     @Test
     public void testMultilineScriptWithLinebreaks()
     {
-<<<<<<< HEAD
-        Assert.assertEquals( "2.0",
-=======
     	// Sun's Rhino was returning 2.0, but Mozilla's seems to be handling numeric strings normally
         Assert.assertEquals( "2",
->>>>>>> 5435fe9765effe81856091b6b929505f177ecd34
                 json.format( JSPluginTest.executeTestScript( "1;\n2", null) ) );
     }
 
@@ -332,4 +328,7 @@ public class JSPluginTest
         String self = (String) ( (JSONObject) object ).get( "self" );
         Assert.assertEquals( self.substring( self.lastIndexOf( "/" ) + 1 ), "1" );
     }*/
+    
+    
+    
 }

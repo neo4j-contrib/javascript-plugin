@@ -24,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -33,7 +35,6 @@ import org.junit.Test;
 import org.neo4j.helpers.Pair;
 import org.neo4j.kernel.impl.annotations.Documented;
 import org.neo4j.server.rest.AbstractRestFunctionalTestBase;
-import org.neo4j.server.rest.JSONPrettifier;
 import org.neo4j.test.GraphDescription.Graph;
 import org.neo4j.test.GraphDescription.NODE;
 import org.neo4j.test.GraphDescription.PROP;
@@ -42,8 +43,6 @@ import org.neo4j.test.GraphDescription.REL;
 import org.neo4j.test.TestData.Title;
 import org.neo4j.visualization.asciidoc.AsciidocHelper;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.google.gson.Gson;
 
 public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
@@ -52,11 +51,20 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     
     private String doRestCall( String script, Status status, Pair<String, String>... params )
     {
-        // TODO Auto-generated method stub
-        return super.doGremlinRestCall( ENDPOINT, script, status, params );
+        return doJavascriptRestCall( ENDPOINT, script, status, params );
     }
     
-    
+    protected String doJavascriptRestCall( String endpoint, String script, Status status, Pair<String, String>... params ) {
+        data.get();
+        String parameterString = createParameterString( params );
+
+
+        String queryString = "{\"script\": \"" + createScript( script ) + "\"," + parameterString+"},"  ;
+
+        gen.get().expectedStatus( status.getStatusCode() ).payload(
+                queryString ).description(formatJavaScript( createScript( script ) ) );
+        return gen.get().post( endpoint ).entity();
+    }
     /**
      * Scripts can be sent as URL-encoded In this example, the graph has been
      * autoindexed by Neo4j, so we can look up the name property on nodes.
@@ -93,6 +101,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      * parameters.
      */
     // evidently URL params isn't supported -- only JSON?
+    // yes, let's skip URLencoded entirely, MAP parameters get messy. PN
     @Title( "Send a Gremlin Script with variables in a JSON Map - URL encoded" )
     @Documented
     @Graph( value = { "I know you" } )
