@@ -40,6 +40,8 @@ include::hyperedges---find-user-roles-in-groups.txt[]
 
 include::group-count.txt[]
 
+include::change-reference-node.txt[]
+
 include::collect-multiple-traversal-results.txt[]
 
 include::collaborative-filtering.txt[]
