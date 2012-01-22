@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2002-2011 "Neo Technology,"
+ * Copyright (c) 2002-2012 "Neo Technology,"
  * Network Engine for Objects in Lund AB [http://neotechnology.com]
  *
  * This file is part of Neo4j.
@@ -580,6 +580,21 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
         assertTrue( response.contains( "v[" + data.get().get( "Ian" ).getId() ) );
         assertTrue( response.contains( "v[" + data.get().get( "Jill" ).getId() ) );
         assertTrue( response.contains( "v[" + data.get().get( "Derrick" ).getId() ) );
+    }
+    
+    /**
+     * Setting the reference node in Neo4j can be achieved through the
+     * native Neo4j API.
+     */
+    @Test
+    @Graph( value = { "Joe knows Bill" }, autoIndexNodes = false )
+    public void change_reference_node() throws UnsupportedEncodingException
+    {
+        String script = "var neo4jdb = g.getRawGraph();" +
+                        "neo4jdb.getConfig().getGraphDbModule().setReferenceNodeId(%Joe%);" +
+                        "neo4jdb.getReferenceNode();";
+        String response = doRestCall( script, Status.OK );
+        assertTrue( graphdb().getReferenceNode().getId()==data.get().get( "Joe" ).getId() );
     }
     
     /**
