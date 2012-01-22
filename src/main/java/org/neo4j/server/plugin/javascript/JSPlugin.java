@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2002-2011 "Neo Technology,"
+ * Copyright (c) 2002-2012 "Neo Technology,"
  * Network Engine for Objects in Lund AB [http://neotechnology.com]
  *
  * This file is part of Neo4j.
@@ -52,7 +52,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
  * and much, much more.
  */
 
-@Description( "A server side Gremlin plugin for the Neo4j REST server" )
+@Description( "A server side Javascript plugin for the Neo4j REST server" )
 public class JSPlugin extends ServerPlugin
 {
 
@@ -78,11 +78,11 @@ public class JSPlugin extends ServerPlugin
     }
 
     @Name( "execute_script" )
-    @Description( "execute a Gremlin script with 'g' set to the Neo4jGraph and 'results' containing the results. Only results of one object type is supported." )
+    @Description( "execute a JavaScript script with 'g' set to the Neo4jGraph and 'results' containing the results. Only results of one object type is supported." )
     @PluginTarget( GraphDatabaseService.class )
     public Representation executeScript(
             @Source final GraphDatabaseService neo4j,
-            @Description( "The Gremlin script" ) @Parameter( name = "script", optional = false ) final String script,
+            @Description( "The script" ) @Parameter( name = "script", optional = false ) final String script,
             @Description( "JSON Map of additional parameters for script variables" ) @Parameter( name = "params", optional = true ) final Map params )
     {
         try
