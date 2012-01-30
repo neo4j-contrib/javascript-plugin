@@ -223,7 +223,7 @@ the relevant Commercial Agreement.
     <repository>
       <id>neo4j-build</id>
       <name>neo4j.org repository</name>
-      <url>https://m2.neo4j.org/content/groups/everything</url>
+      <url>http://m2.neo4j.org/content/groups/everything</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
