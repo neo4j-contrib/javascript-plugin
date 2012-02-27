@@ -24,8 +24,8 @@ import java.util.List;
 
 import org.neo4j.server.plugin.javascript.JSToRepresentationConverter;
 
-import com.tinkerpop.pipes.util.Table;
-import com.tinkerpop.pipes.util.Table.Row;
+import com.tinkerpop.pipes.util.structures.Row;
+import com.tinkerpop.pipes.util.structures.Table;
 
 public class GremlinTableRepresentation extends ObjectRepresentation
 {

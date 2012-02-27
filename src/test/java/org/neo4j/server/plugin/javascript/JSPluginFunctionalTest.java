@@ -156,7 +156,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     {
         //String script = "g.loadGraphML('https://raw.github.com/neo4j/gremlin-plugin/master/src/data/graphml1.xml');" +
         //                "g.V;";
-        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.util.graphml);" +
+        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.util.io.graphml);" +
         				"url = 'https://raw.github.com/neo4j/gremlin-plugin/master/src/data/graphml1.xml';" +
         				"GraphMLReader.inputGraph(g, new java.net.URL(url).openStream());" +
         				"pipe.start(g).V()";       	
@@ -175,7 +175,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     @Graph( value = { "I know you", "I know him" } )
     public void emitGraph() throws UnsupportedEncodingException
     {
-        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.util.graphml);" +
+        String script = "importPackage(Packages.com.tinkerpop.blueprints.pgm.util.io.graphml);" +
         				"writer = new GraphMLWriter(g);" +
         				"out = new java.io.ByteArrayOutputStream();" +
                         "writer.outputGraph(out);" +
@@ -296,7 +296,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     	//				"pipe.start(g.getVertex(%I%)).as('I').out('know').as('friend').out('like').as('likes').table(t,['friend','likes']){it.name}{it.name}.iterate();" +
     	//				"return t";
     	
-    	String script = "importPackage(Packages.com.tinkerpop.pipes.util);" +
+    	String script = "importPackage(Packages.com.tinkerpop.pipes.util.structures);" +
         				"t = new Table();" +
         				"stepNames = new java.util.ArrayList();" +
         				"stepNames.add('friend');" +
@@ -323,7 +323,7 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
             "Joe like dogs" } )
     public void returning_nested_pipes()
     {
-        String script = "importPackage(Packages.com.tinkerpop.pipes.util);" +
+        String script = "importPackage(Packages.com.tinkerpop.pipes.util.structures);" +
         				"columnFunc = function(vertex) { return vertex.getProperty('name'); };" +
         				"pipe.start(g.getVertex(%I%)).as('I')." +
         				"out(['know']).as('friend')." +
