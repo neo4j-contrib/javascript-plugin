@@ -60,7 +60,7 @@ public class JSPluginTest
         neo4j = new ImpermanentGraphDatabase();
         plugin = new JSPlugin();
         Graph graph = new Neo4jGraph( neo4j );
-        
+        graph.clear();
         Vertex marko = graph.addVertex( "1" );
         marko.setProperty( "name", "marko" );
         marko.setProperty( "age", 29 );
@@ -140,7 +140,7 @@ public class JSPluginTest
     	String script = "pipe.start(g).V()";
         JSONArray array = (JSONArray) parser.parse( json.format( JSPluginTest.executeTestScript( script, null) ) );
         List<String> ids = new ArrayList<String>( Arrays.asList( "1", "2", "3", "4", "5", "6" ) );
-        Assert.assertEquals( array.size(), 6 );
+        Assert.assertEquals( 6, array.size() );
         for ( Object object : array )
         {
             String self = (String) ( (JSONObject) object ).get( "self" );
