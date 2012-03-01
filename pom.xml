@@ -3,14 +3,14 @@
     <groupId>org.neo4j.build</groupId>
     <artifactId>parent-central</artifactId>
     <relativePath />
-    <version>31</version>
+    <version>32</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.neo4j.server.plugin</groupId>
   <artifactId>neo4j-javascript-plugin</artifactId>
   <packaging>jar</packaging>
-  <version>1.6-SNAPSHOT</version>
+  <version>1.7-SNAPSHOT</version>
   <name>neo4j-javascript-plugin</name>
 
   <properties>
@@ -20,9 +20,9 @@
     <jackson.version>1.9.2</jackson.version>
     <cxf.version>2.3.1</cxf.version>
     <servlet-api.version>2.5</servlet-api.version>
-    <neo4j.version>1.6.M03</neo4j.version>
-    <gremlin.version>1.5-SNAPSHOT</gremlin.version>
-    <blueprints.version>1.2-SNAPSHOT</blueprints.version>
+    <neo4j.version>1.7-SNAPSHOT</neo4j.version>
+    <gremlin.version>1.5</gremlin.version>
+    <blueprints.version>1.2</blueprints.version>
     <jersey.server.version>1.6</jersey.server.version>
     <license-text.header>GPL-3-header.txt</license-text.header>
   </properties>

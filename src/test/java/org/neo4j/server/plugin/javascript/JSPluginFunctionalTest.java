@@ -591,8 +591,11 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
     public void change_reference_node() throws UnsupportedEncodingException
     {
         String script = "var neo4jdb = g.getRawGraph();" +
-                        "neo4jdb.getConfig().getGraphDbModule().setReferenceNodeId(%Joe%);" +
-                        "neo4jdb.getReferenceNode();";
+        		"var tx = neo4jdb.beginTx();" +
+                        "neo4jdb.getNodeManager().setReferenceNodeId(%Joe%);" +
+                        "neo4jdb.getReferenceNode();" +
+                        "tx.success();" +
+                        "tx.finish();";
         String response = doRestCall( script, Status.OK );
         assertTrue( graphdb().getReferenceNode().getId()==data.get().get( "Joe" ).getId() );
     }
@@ -601,7 +604,6 @@ public class JSPluginFunctionalTest extends AbstractRestFunctionalTestBase
      */
     @Documented
     @Test
-    //@Ignore //preparation to track down a Gremlin issue
     @Graph( value = { 
             "Root AllFriends John", 
             "Root AllFriends Jack", 
