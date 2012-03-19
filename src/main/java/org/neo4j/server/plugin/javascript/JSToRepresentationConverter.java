@@ -37,6 +37,7 @@ import org.neo4j.server.rest.repr.RelationshipRepresentation;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.server.rest.repr.RepresentationType;
 import org.neo4j.server.rest.repr.ValueRepresentation;
+import org.neo4j.server.webadmin.rest.representations.JmxAttributeRepresentationDispatcher;
 
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jEdge;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
@@ -178,9 +179,6 @@ public class JSToRepresentationConverter
         {
             return ValueRepresentation.number( ( (Integer) result ).intValue() );
         }
-        else
-        {
-            return ValueRepresentation.string( result.toString() );
-        }
-    }
+        JmxAttributeRepresentationDispatcher representationDispatcher = new JmxAttributeRepresentationDispatcher();
+        return representationDispatcher.dispatch( result, "" );    }
 }
