@@ -10,7 +10,7 @@
   <groupId>org.neo4j.server.plugin</groupId>
   <artifactId>neo4j-javascript-plugin</artifactId>
   <packaging>jar</packaging>
-  <version>1.7-SNAPSHOT</version>
+  <version>1.8-SNAPSHOT</version>
   <name>neo4j-javascript-plugin</name>
 
   <properties>
